@@ -60,6 +60,7 @@ void puts(char *s)
 	}
 }
 
+
 #define MAX_CMDNAME 19
 #define MAX_ARGC 19
 #define MAX_CMDHELP 1023
@@ -746,7 +747,8 @@ void show_echo(int argc, char* argv[])
 //test
 void show_test(int argc, char* argv[])
 {
-	write(fdout, "test", 5);
+	//write(fdout, "test", 5);
+	printf("bb");
 }
 
 //man
@@ -1222,6 +1224,13 @@ int main()
 			if (tasks[current_task].stack->r0 != 0) {
 				tasks[current_task].stack->r0 += tick_count;
 				tasks[current_task].status = TASK_WAIT_TIME;
+			}
+			break;
+		case 0xa: /*printf */
+			{
+				char *str = tasks[current_task].stack->r0;
+				puts(next_line);
+				puts(str);
 			}
 			break;
 		default: /* Catch all interrupts */
