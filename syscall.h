@@ -16,5 +16,3 @@ int setpriority(int who, int value);
 int mknod(int fd, int mode, int dev);
 
 void sleep(unsigned int);
-
-void printf(char *s);

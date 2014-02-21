@@ -4,6 +4,7 @@
 #include "syscall.h"
 
 #include <stddef.h>
+#include <stdarg.h>
 
 void *memcpy(void *dest, const void *src, size_t n);
 
@@ -48,6 +49,20 @@ size_t strlen(const char *s)
 		"	bx   lr					\n"
 		:::
 	);
+}
+
+void strcat(char *dest, const char *src)
+{
+	char *ptr = dest;
+	while (*ptr != '\0')
+		ptr++;
+	while (*src != '\0')
+	{
+		*ptr = *src;
+		ptr++;
+		src++;
+	}
+	*ptr = '\0';
 }
 
 void puts(char *s)
@@ -744,11 +759,62 @@ void show_echo(int argc, char* argv[])
 		write(fdout, next_line, 3);
 }
 
+
+//printf
+void printf(char *s, ...)
+{
+	va_list args;
+	char buffer[50] = "", *ptr;
+	va_start(args, s);
+	ptr = buffer;
+	while (*s != '\0')
+	{
+		if (*s == '%')
+		{
+			s++;
+			switch (*s)
+			{
+				case 'd':
+				{
+					int num = va_arg(args, int);
+					char c[10];
+					itoa(num, c, 10);
+					strcat(buffer, c);
+					while (*ptr != '\0')
+						ptr++;
+					break;
+				}
+				case 's':
+				{
+					char *c;
+					c = va_arg(args, char*);
+					strcat(buffer, c);
+					ptr += strlen(c);
+					break;
+				}
+				default:
+				
+				break;
+			}
+		} else {
+			*ptr = *s;
+			ptr++;
+		}
+			
+		s++;
+	}
+	*(ptr++) = '\n';
+	*(ptr++) = '\r';
+	*(ptr++) = '\0';
+	va_end(args);
+	write(fdout, buffer, sizeof(buffer));
+}
+
 //test
 void show_test(int argc, char* argv[])
 {
-	//write(fdout, "test", 5);
-	printf("bb");
+	printf("Testing int %d ;", 1);
+	printf("Testing str %s !", "printed");
 }
 
 //man
@@ -1224,13 +1290,6 @@ int main()
 			if (tasks[current_task].stack->r0 != 0) {
 				tasks[current_task].stack->r0 += tick_count;
 				tasks[current_task].status = TASK_WAIT_TIME;
-			}
-			break;
-		case 0xa: /*printf */
-			{
-				char *str = tasks[current_task].stack->r0;
-				puts(next_line);
-				puts(str);
 			}
 			break;
 		default: /* Catch all interrupts */
