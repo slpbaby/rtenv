@@ -51,12 +51,6 @@ size_t strlen(const char *s)
 	);
 }
 
-char *strcat(char* dest, const char* src)
-{
-	strcpy(dest + strlen(dest), src);
-	return dest;
-}
-
 void puts(char *s)
 {
 	while (*s) {
@@ -771,7 +765,8 @@ void printf(char *s, ...)
 					int num = va_arg(args, int);
 					char c[10];
 					itoa(num, c, 10);
-					ptr = (char*)strcat(buffer, c);
+					*ptr = '\0';
+					strcpy(buffer + strlen(buffer), c);
 					while (*ptr != '\0')
 						ptr++;
 					break;
@@ -780,7 +775,8 @@ void printf(char *s, ...)
 				{
 					char *c;
 					c = va_arg(args, char*);
-					ptr = (char*)strcat(buffer, c);
+					*ptr = '\0';
+					strcpy(buffer + strlen(buffer), c);
 					while (*ptr != '\0')
 						ptr++;
 					break;
