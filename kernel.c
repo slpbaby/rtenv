@@ -763,22 +763,27 @@ void printf(char *s, ...)
 				case 'd':
 				{
 					int num = va_arg(args, int);
-					char c[10];
+					char c[10], *cptr;
 					itoa(num, c, 10);
-					*ptr = '\0';
-					strcpy(buffer + strlen(buffer), c);
-					while (*ptr != '\0')
+					cptr = c;
+					while (*cptr != '\0') 
+					{
+						*ptr = *cptr;
 						ptr++;
+						cptr++;
+					}
 					break;
 				}
 				case 's':
 				{
 					char *c;
 					c = va_arg(args, char*);
-					*ptr = '\0';
-					strcpy(buffer + strlen(buffer), c);
-					while (*ptr != '\0')
+					while (*c != '\0') 
+					{
+						*ptr = *c;
 						ptr++;
+						c++;
+					}
 					break;
 				}
 				default:
