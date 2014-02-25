@@ -137,7 +137,7 @@ const hcmd_entry cmd_data[CMD_COUNT] = {
 	[CMD_MAN] = {.cmd = "man", .func = show_man_page, .description = "Manual pager."},
 	[CMD_PS] = {.cmd = "ps", .func = show_task_info, .description = "List all the processes."},
 	[CMD_TEST] = {.cmd = "test", .func = show_test, .description = "testing" },
-	[CMD_NP] = {.cmd = "np", .func = new_proc, .description = "Add a process" }
+	[CMD_NP] = {.cmd = "newproc", .func = new_proc, .description = "Add a process" }
 };
 
 /* Structure for environment variables. */
@@ -662,8 +662,7 @@ void test_proc()
 //np
 void new_proc(int argc, char* argv[])
 {
-	setpriority(0,30);
-	if (!fork()) setpriority(0, 0), test_proc();
+	if (!fork()) test_proc();
 }
 
 //ps
@@ -778,9 +777,8 @@ void printf(char *s, ...)
 			{
 				case 'd':
 				{
-					int num = va_arg(args, int);
 					char c[10], *cptr;
-					itoa(num, c, 10);
+					itoa(va_arg(args, int), c, 10);
 					cptr = c;
 					while (*cptr != '\0') 
 					{
@@ -792,13 +790,14 @@ void printf(char *s, ...)
 				}
 				case 's':
 				{
-					char *c;
+					char *c, *cptr;
 					c = va_arg(args, char*);
-					while (*c != '\0') 
+					cptr = c;
+					while (*cptr != '\0') 
 					{
-						*ptr = *c;
+						*ptr = *cptr;
 						ptr++;
-						c++;
+						cptr++;
 					}
 					break;
 				}
@@ -881,6 +880,7 @@ void first()
 	if (!fork()) setpriority(0, 0), serialin(USART2, USART2_IRQn);
 	if (!fork()) rs232_xmit_msg_task();
 	if (!fork()) setpriority(0, PRIORITY_DEFAULT - 10), serial_test_task();
+	if (!fork()) test_proc();
 
 	setpriority(0, PRIORITY_LIMIT);
 
