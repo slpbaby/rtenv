@@ -182,6 +182,11 @@ struct task_control_block {
 };
 struct task_control_block tasks[TASK_LIMIT];
 
+struct new_proc_block {
+	int action;
+	void (*proc)();
+};
+struct new_proc_block proc_block;
 /* 
  * pathserver assumes that all files are FIFOs that were registered
  * with mkfifo.  It also assumes a global tables of FDs shared by all
@@ -655,6 +660,7 @@ void export_envvar(int argc, char *argv[])
 
 void test_proc()
 {
+	setpriority(0, 23);
 	while(1)
 		sleep(100);
 }
@@ -662,7 +668,8 @@ void test_proc()
 //np
 void new_proc(int argc, char* argv[])
 {
-	if (!fork()) test_proc();
+	proc_block.action = 1;
+	proc_block.proc = &test_proc;
 }
 
 //ps
@@ -880,11 +887,17 @@ void first()
 	if (!fork()) setpriority(0, 0), serialin(USART2, USART2_IRQn);
 	if (!fork()) rs232_xmit_msg_task();
 	if (!fork()) setpriority(0, PRIORITY_DEFAULT - 10), serial_test_task();
-	if (!fork()) test_proc();
 
 	setpriority(0, PRIORITY_LIMIT);
-
-	while(1);
+	proc_block.action = 0;
+	while(1)
+	{
+		if (proc_block.action == 1)
+		{
+			if (!fork()) proc_block.proc();
+			proc_block.action = 0;
+		}
+	}
 }
 
 struct pipe_ringbuffer {
@@ -1219,7 +1232,7 @@ int main()
 		tasks[current_task].status = TASK_READY;
 		timeup = 0;
 
-		switch (tasks[current_task].stack->r7) {
+		switch (tasks[current_task].stack->r8) {
 		case 0x1: /* fork */
 			if (task_count == TASK_LIMIT) {
 				/* Cannot create a new task, return error */
@@ -1303,8 +1316,8 @@ int main()
 			}
 			break;
 		default: /* Catch all interrupts */
-			if ((int)tasks[current_task].stack->r7 < 0) {
-				unsigned int intr = -tasks[current_task].stack->r7 - 16;
+			if ((int)tasks[current_task].stack->r8 < 0) {
+				unsigned int intr = -tasks[current_task].stack->r8 - 16;
 
 				if (intr == SysTick_IRQn) {
 					/* Never disable timer. We need it for pre-emption */
