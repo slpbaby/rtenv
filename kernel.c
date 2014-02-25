@@ -109,6 +109,7 @@ void show_task_info(int argc, char *argv[]);
 void show_man_page(int argc, char *argv[]);
 void show_history(int argc, char *argv[]);
 void show_test(int argc, char *argv[]);
+void new_proc(int argc, char *argv[]);
 
 /* Enumeration for command types. */
 enum {
@@ -119,6 +120,7 @@ enum {
 	CMD_MAN,
 	CMD_PS,
 	CMD_TEST,
+	CMD_NP,
 	CMD_COUNT
 } CMD_TYPE;
 /* Structure for command handler. */
@@ -134,7 +136,8 @@ const hcmd_entry cmd_data[CMD_COUNT] = {
 	[CMD_HISTORY] = {.cmd = "history", .func = show_history, .description = "Show latest commands entered."}, 
 	[CMD_MAN] = {.cmd = "man", .func = show_man_page, .description = "Manual pager."},
 	[CMD_PS] = {.cmd = "ps", .func = show_task_info, .description = "List all the processes."},
-	[CMD_TEST] = {.cmd = "test", .func = show_test, .description = "testing" }
+	[CMD_TEST] = {.cmd = "test", .func = show_test, .description = "testing" },
+	[CMD_NP] = {.cmd = "np", .func = new_proc, .description = "Add a process" }
 };
 
 /* Structure for environment variables. */
@@ -648,6 +651,19 @@ void export_envvar(int argc, char *argv[])
 			env_count++;
 		}
 	}
+}
+
+void test_proc()
+{
+	while(1)
+		sleep(100);
+}
+
+//np
+void new_proc(int argc, char* argv[])
+{
+	setpriority(0,30);
+	if (!fork()) setpriority(0, 0), test_proc();
 }
 
 //ps
