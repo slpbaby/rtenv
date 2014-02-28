@@ -182,6 +182,11 @@ struct task_control_block {
 };
 struct task_control_block tasks[TASK_LIMIT];
 
+enum {
+	NEW_PROC,
+	NO_PROC
+} PROC_CMD;
+
 struct new_proc_block {
 	int action;
 	void (*proc)();
@@ -661,14 +666,13 @@ void export_envvar(int argc, char *argv[])
 void test_proc()
 {
 	setpriority(0, 23);
-	while(1)
-		sleep(100);
+	while(1);
 }
 
 //np
 void new_proc(int argc, char* argv[])
 {
-	proc_block.action = 1;
+	proc_block.action = NEW_PROC;
 	proc_block.proc = &test_proc;
 }
 
@@ -889,15 +893,17 @@ void first()
 	if (!fork()) setpriority(0, PRIORITY_DEFAULT - 10), serial_test_task();
 
 	setpriority(0, PRIORITY_LIMIT);
-	proc_block.action = 0;
+	proc_block.action = NO_PROC;
 	while(1)
 	{
-		if (proc_block.action == 1)
+		if (proc_block.action == NEW_PROC)
 		{
 			if (!fork()) proc_block.proc();
-			proc_block.action = 0;
+			proc_block.action = NO_PROC;
 		}
 	}
+
+	//Fork doesn't have multiple stack function, so it can't be fork in child process.
 }
 
 struct pipe_ringbuffer {
