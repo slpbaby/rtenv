@@ -1,0 +1,30 @@
+source header.in
+set logging on
+set cmd[0][0]='m'
+set cmd[0][1]='a'
+set cmd[0][2]='n'
+set cmd[0][3]='\0'
+set cmd[1][0]='m'
+set cmd[1][1]='a'
+set cmd[1][2]='n'
+set cmd[1][3]='\0'
+set $r0=strcmp(cmd[0],cmd[1])
+if !$r0
+	echo Pass: strcmp of 'man' with 'man' is 0\n
+else
+	echo Failed: It shall be 0\n
+end
+set cmd[0][0]='a'
+set $r0=strcmp(cmd[0],cmd[1])
+if $r0<0
+	echo Pass: strcmp of 'aan' with 'man' should be negative\n
+else
+	echo Failed: It shall be negative\n
+end
+set cmd[0][0]='z'
+set $r0=strcmp(cmd[0],cmd[1])
+if $r0>0
+	echo Pass: strcmp of 'aan' with 'man' should be positive\n
+else
+	echo Failed: It shall be positive\n
+end

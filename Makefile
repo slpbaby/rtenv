@@ -95,9 +95,13 @@ qemu_unit_test:
 		-gdb tcp::3333 -S \
 		-serial stdio \
 		-kernel main.bin -monitor null >/dev/null &
-	$(CROSS_COMPILE)gdb -batch -x test_strlen.in
-	mv -f gdb.txt test_strlen.txt
-	pkill -9 $(notdir $(QEMU_STM32))
+	@echo
+	@$(CROSS_COMPILE)gdb -batch -x strlen_test.in
+	@mv -f gdb.txt strlen_test.txt
+	@$(CROSS_COMPILE)gdb -batch -x strcmp_test.in
+	@mv -f gdb.txt strcmp_test.txt
+	@echo
+	@pkill -9 $(notdir $(QEMU_STM32))
 
 clean:
 	rm -f *.elf *.bin *.list
